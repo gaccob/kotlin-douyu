@@ -64,7 +64,18 @@ object DouyuSocketConnector : ListenableSocketConnector {
 
 
     override fun heartbeat(data: ByteArray) {
-        throw UnsupportedOperationException()
+        try {
+            //向弹幕服务器发送心跳请求数据包
+            bos?.write(data, 0, data.size);
+            bos?.flush();
+            logger.debug("Send keep alive request successfully!");
+        } catch(e: Exception) {
+            logger.error("Send keep alive request failed!", e);
+        }
+    }
+
+    fun heartbeat(protocol: Protocol) {
+        heartbeat(protocol.getClause(SocketEventType.HEARTBEAT).get(0).toServer(mapOf(Pair("type", "keeplive"), Pair("tick", (System.currentTimeMillis() / 1000)))))
     }
 
     override fun pull(data: ByteArray) {
