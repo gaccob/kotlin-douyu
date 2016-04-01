@@ -1,5 +1,6 @@
 package robott.dy.protocol.clause
 
+import robott.dy.event.BulletScreenEvent
 import robott.dy.event.SocketEvent
 import robott.dy.event.SocketEventType
 
@@ -11,11 +12,9 @@ object BulletScreenClauseObject : Clause {
     override fun clauseFor(): SocketEventType = SocketEventType.BULLETSCREEN
 
     override fun toClient(byteArray: ByteArray): SocketEvent {
-        throw UnsupportedOperationException()
+        return BulletScreenEvent(byteArray, "bulletscreen")
     }
 
-    override fun toServer(map: Map<String,Any>): ByteArray {
-        throw UnsupportedOperationException()
-    }
+    override fun toServer(map: Map<String, Any>): ByteArray = DouyuEncoderObject.asBytes(map)
 
 }
