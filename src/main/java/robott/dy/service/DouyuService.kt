@@ -8,6 +8,7 @@ import robott.dy.protocol.DouyuSocketProtocol
 import robott.dy.protocol.clause.BulletScreenClauseObject
 import robott.dy.protocol.clause.ConnectClauseObject
 import robott.dy.protocol.clause.HeartbeatClauseObject
+import robott.dy.protocol.clause.JoinGroupClauseObject
 
 /**
  * Douyu service object
@@ -46,7 +47,7 @@ object DouyuService {
     fun getReadyFlag(): Boolean = readyFlag
 
     private fun prepare() {
-        protocol.addClause(ConnectClauseObject).addClause(HeartbeatClauseObject).addClause(BulletScreenClauseObject)
+        protocol.addClause(ConnectClauseObject).addClause(HeartbeatClauseObject).addClause(BulletScreenClauseObject).addClause(JoinGroupClauseObject)
     }
 
 }
