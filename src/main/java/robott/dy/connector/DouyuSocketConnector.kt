@@ -2,10 +2,14 @@ package robott.dy.connector
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.log4j.Logger
+import robott.dy.event.BulletScreenEvent
+import robott.dy.event.HeartbeatEvent
 import robott.dy.event.SocketEvent
 import robott.dy.event.SocketEventType
 import robott.dy.listener.SocketMessageListener
 import robott.dy.protocol.Protocol
+import robott.dy.protocol.clause.DouyuEncoderObject
+import robott.dy.service.DouyuService
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.net.InetAddress
@@ -28,6 +32,8 @@ object DouyuSocketConnector : ListenableSocketConnector {
     private var bos: BufferedOutputStream? = null
     private var bis: BufferedInputStream? = null
 
+    private var listeners: MutableList<SocketMessageListener> = mutableListOf()
+
     override fun connect(data: ByteArray): ByteArray {
         //建立socke连接
         sock = Socket(InetAddress.getByName(hostName).hostAddress, port)
@@ -46,7 +52,6 @@ object DouyuSocketConnector : ListenableSocketConnector {
         bis?.read(recvByte, 0, recvByte.size)
 
         logger.debug("Server Connect Successfully!")
-
         return recvByte
     }
 
@@ -54,12 +59,56 @@ object DouyuSocketConnector : ListenableSocketConnector {
         throw UnsupportedOperationException()
     }
 
-    override fun registe(listener: SocketMessageListener) {
-        throw UnsupportedOperationException()
+    override fun registe(vararg listener: SocketMessageListener) {
+        listeners.addAll(listener)
+        if (logger.isDebugEnabled) {
+            logger.debug("add listener %s !".format(listener))
+        }
     }
 
     override fun broadcast(data: ByteArray) {
-        throw UnsupportedOperationException()
+        //根据TCP协议获取返回信息中的字符串信息
+        var dataStr = String(data, 12, data.size - 12)
+        while (dataStr.lastIndexOf("type@=") > 5) {
+            //分析该包的数据类型，以及根据需要进行业务操作
+            broadcastInternal(dataStr)
+            //处理黏包中的剩余部分
+            dataStr = StringUtils.substring(dataStr, 0, dataStr.lastIndexOf("type@=") - 12)
+        }
+        broadcastInternal(dataStr)
+    }
+
+    private fun broadcastInternal(dataStr: String) {
+        //对黏包中最后一个数据包进行解析
+        val tempMsg = StringUtils.substring(dataStr, dataStr.lastIndexOf("type@="))
+        val map: Map<String, Any> = DouyuEncoderObject.parsetToMap(tempMsg);
+        if (map.get("type") != null) {
+            //服务器反馈错误信息
+            if (map.get("type").toString().contentEquals("error")) {
+                logger.debug(map.toString())
+                //结束心跳和获取弹幕线程
+                DouyuService.setReadFlag(false)
+            }
+
+            val emptyByteArray = "".toByteArray()
+            var event: SocketEvent? = null
+            //判断消息类型
+            when (map.get("type").toString()) {
+                "chatmsg" -> {
+                    event = BulletScreenEvent(emptyByteArray, map.toString())
+                }
+                "keeplive" -> {
+                    event = HeartbeatEvent(emptyByteArray, map.toString())
+                }
+                else -> {
+                    logger.debug("[Unknow] -> " + map.toString())
+                }
+            }
+            if (event != null) {
+                broadcast(event)
+            }
+
+        }
     }
 
 
@@ -79,7 +128,23 @@ object DouyuSocketConnector : ListenableSocketConnector {
     }
 
     override fun pull(data: ByteArray) {
-        throw UnsupportedOperationException()
+        //初始化获取弹幕服务器返回信息包大小
+        val recvByte = ByteArray(MAX_BUFFER_LENGTH)
+        //定义服务器返回信息的字符串
+        var dataStr: String
+
+        //读取服务器返回信息，并获取返回信息的整体字节长度
+        val recvLen = bis?.read(recvByte, 0, recvByte.size)
+        //根据实际获取的字节数初始化返回信息内容长度
+        val realBuf = ByteArray(recvLen as Int)
+        //按照实际获取的字节长度读取返回信息
+        System.arraycopy(recvByte, 0, realBuf, 0, recvLen)
+        // broadcast receive bytes
+        broadcast(realBuf)
+    }
+
+    fun pull(protocol: Protocol) {
+        pull(protocol.getClause(SocketEventType.BULLETSCREEN).get(0).toServer(mapOf()))
     }
 
 
@@ -93,6 +158,19 @@ object DouyuSocketConnector : ListenableSocketConnector {
      * broadcast event message to listeners
      */
     fun broadcast(event: SocketEvent) {
+        when (event) {
+            is HeartbeatEvent -> {
+                listeners.filter({ it.listenerFor().equals(SocketEventType.HEARTBEAT) }).forEach { it.onMessage(event) }
+            }
+            is BulletScreenEvent -> {
+                listeners.filter({ it.listenerFor().equals(SocketEventType.BULLETSCREEN) }).forEach { it.onMessage(event) }
+            }
+            else -> {
+                if (logger.isDebugEnabled) {
+                    logger.debug("Unbroadcast or unsupported event %s".format(event))
+                }
+            }
+        }
     }
 
     fun connect(rid: Int, gid: Int, protocol: Protocol): Boolean {
