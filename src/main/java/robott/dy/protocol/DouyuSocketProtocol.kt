@@ -13,10 +13,11 @@ object DouyuSocketProtocol : Protocol {
 
     var clauses: Array<Clause> = emptyArray<Clause>()
 
-    override fun addClause(clause: Clause): Protocol {
-        clauses = arrayOf(clause).plus(clauses)
-        logger.debug("Clause %s loaded !".format(clause))
-        return this
+    override fun addClause(vararg clause: Clause) {
+        clauses = clauses.plus(clause)
+        if (logger.isDebugEnabled) {
+            logger.debug("Clause %s loaded !".format(clause))
+        }
     }
 
     override fun getClause(type: SocketEventType): List<Clause> {

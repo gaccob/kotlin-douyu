@@ -11,7 +11,7 @@ interface Protocol {
     /**
      * Add a clause to protocol
      */
-    fun addClause(clause: Clause): Protocol
+    fun addClause(vararg clause: Clause)
 
     /**
      * get clause by socket event type
