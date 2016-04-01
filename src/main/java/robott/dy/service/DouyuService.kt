@@ -3,6 +3,9 @@ package robott.dy.service
 import org.apache.log4j.Logger
 import robott.dy.connector.DouyuSocketConnector
 import robott.dy.event.SocketEventType
+import robott.dy.listener.BulletScreenEventPrinter
+import robott.dy.listener.ConnectEventPrinter
+import robott.dy.listener.HeartbeatEventPrinter
 import robott.dy.listener.SocketMessageListener
 import robott.dy.protocol.DouyuSocketProtocol
 import robott.dy.protocol.clause.BulletScreenClauseObject
@@ -38,6 +41,14 @@ object DouyuService {
     fun heartbeat() = connector.heartbeat(protocol)
 
     /**
+     * pull operation
+     */
+    fun pull() {
+        //        throw UnsupportedOperationException("not implemented")
+        connector.pull(protocol);
+    }
+
+    /**
      * registe listener
      */
     fun registe(eventType: SocketEventType, listener: SocketMessageListener) {
@@ -46,8 +57,14 @@ object DouyuService {
 
     fun getReadyFlag(): Boolean = readyFlag
 
-    private fun prepare() {
-        protocol.addClause(ConnectClauseObject).addClause(HeartbeatClauseObject).addClause(BulletScreenClauseObject).addClause(JoinGroupClauseObject)
+    fun setReadFlag(readFlag: Boolean) {
+        this.readyFlag = readFlag
     }
+
+    private fun prepare() {
+        protocol.addClause(ConnectClauseObject, HeartbeatClauseObject, BulletScreenClauseObject, JoinGroupClauseObject)
+        connector.registe(ConnectEventPrinter, HeartbeatEventPrinter, BulletScreenEventPrinter)
+    }
+
 
 }
