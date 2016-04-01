@@ -13,7 +13,7 @@ object HeartbeatService : Thread() {
     override fun run() {
         while (DouyuService.getReadyFlag()) {
             DouyuService.heartbeat()
-            logger.debug("- -! heartbeat")
+            logger.debug("heartbeat called")
             try {
                 //设置间隔45秒再发送心跳协议
                 Thread.sleep(45 * 1000);        //keep live at least once per minute
