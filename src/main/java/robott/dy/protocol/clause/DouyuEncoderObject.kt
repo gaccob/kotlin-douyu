@@ -15,17 +15,13 @@ object DouyuEncoderObject {
     fun asBytes(map: Map<String, Any>): ByteArray {
         val buf = StringBuffer();
 
-        map.forEach { E ->
-            {
-                convert(buf, E)
-            }
-        }
+        map.forEach { convert(buf, it) }
 
         buf?.append(0.toChar()).toString()
         return getByte(buf.toString())
     }
 
-    private fun convert(buffer: StringBuffer, Entry: Map.Entry<String, Any>) {
+    public fun convert(buffer: StringBuffer, Entry: Map.Entry<String, Any>) {
         buffer?.append(Entry.key.replace("/".toRegex(), "@S").replace("@".toRegex(), "@A"))
         buffer?.append("@=")
         if (Entry.value is String) {
