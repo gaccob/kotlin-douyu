@@ -1,6 +1,7 @@
 package robott.dy.listener
 
 import robott.dy.event.SocketEvent
+import robott.dy.event.SocketEventType
 
 /**
  * Socket message listener
@@ -16,4 +17,9 @@ interface SocketMessageListener {
      * Do when socket message come
      */
     fun onMessage(event: SocketEvent)
+
+    /**
+     * Tell what kind socket event it listen
+     */
+    fun listenerFor(): SocketEventType;
 }
