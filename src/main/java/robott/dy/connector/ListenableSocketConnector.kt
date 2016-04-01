@@ -10,7 +10,7 @@ interface ListenableSocketConnector : SocketConnector {
     /**
      * registe listener
      */
-    fun registe(listener: SocketMessageListener)
+    fun registe(vararg listener: SocketMessageListener)
 
     /**
      * broadcast message to listeners
