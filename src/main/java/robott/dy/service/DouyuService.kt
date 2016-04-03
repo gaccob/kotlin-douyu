@@ -20,11 +20,11 @@ import robott.dy.protocol.clause.JoinGroupClauseObject
  * Douyu service object
  * Created by linpeng on 2016/3/31.
  */
-object DouyuService {
+class DouyuService {
     internal val logger = Logger.getLogger(this.javaClass)
 
     private val liveRoomUrl = "http://capi.douyucdn.cn/api/v1/live?limit=%d&offset=%d"
-    private var connector = DouyuSocketConnector
+    private var connector = DouyuSocketConnector(this)
     private var protocol = DouyuSocketProtocol
     private var readyFlag = false
 
