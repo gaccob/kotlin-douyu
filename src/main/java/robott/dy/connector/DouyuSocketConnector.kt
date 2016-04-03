@@ -19,9 +19,10 @@ import java.net.Socket
  * Socket connector for douyu
  * Created by linpeng on 2016/3/31.
  */
-object DouyuSocketConnector : ListenableSocketConnector {
+class DouyuSocketConnector(douyuService: DouyuService) : ListenableSocketConnector {
     internal val logger = Logger.getLogger(this.javaClass)
 
+    private val douyuService = douyuService
     private val hostName = "openbarrage.douyutv.com"
     //第三方弹幕协议服务器端口
     private val port = 8601
@@ -87,7 +88,7 @@ object DouyuSocketConnector : ListenableSocketConnector {
             if (map.get("type").toString().contentEquals("error")) {
                 logger.debug(map.toString())
                 //结束心跳和获取弹幕线程
-                DouyuService.setReadFlag(false)
+                douyuService.setReadFlag(false)
             }
 
             val emptyByteArray = "".toByteArray()
