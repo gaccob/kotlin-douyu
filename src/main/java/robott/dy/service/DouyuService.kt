@@ -56,7 +56,7 @@ object DouyuService {
      * registe listener
      */
     fun registe(eventType: SocketEventType, listener: SocketMessageListener) {
-
+        throw UnsupportedOperationException("not implemented")
     }
 
     fun getReadyFlag(): Boolean = readyFlag
