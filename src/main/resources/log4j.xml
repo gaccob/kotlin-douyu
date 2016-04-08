@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    <!-- Syslog appender-->
+    <appender name="syslogAppender" class="org.apache.log4j.net.SyslogAppender">
+        <param name="syslogHost" value="127.0.0.1"/>
+        <!--<param name="facility" value="LOCAL" />-->
+        <param name="header" value="true"/>
+        <!--<param name="threshold" value="INFO"/>-->
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%5p | %c{1}-%M [%d{yyyy-MM-dd HH:mm:ss}] - %m%n"/>
+        </layout>
+        <filter class="org.apache.log4j.varia.StringMatchFilter">
+            <param name="stringToMatch" value="[弹幕]"/>
+            <param name="AcceptOnMatch" value="true" />
+        </filter>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMax" value="INFO"/>
+            <param name="LevelMin" value="INFO"/>
+        </filter>
+    </appender>
     <!-- 必须项-->
     <appender name="infoAppender" class="org.apache.log4j.DailyRollingFileAppender">
         <param name="File" value="./data/log/stdout.log"/>
@@ -45,7 +63,8 @@
     <!-- 必须项-->
     <!-- 定义以robott.dy开头的类的日志级别 -->
     <logger name="robott.dy" additivity="false">
-        <level value="debug"/>
+        <level value="INFO"/>
+        <appender-ref ref="syslogAppender"/>
         <appender-ref ref="infoAppender"/>
         <appender-ref ref="errorAppender"/>
         <appender-ref ref="myConsole"/>
