@@ -18,6 +18,6 @@ object ConnectEventPrinter : SocketMessageListener {
     }
 
     override fun onMessage(event: SocketEvent) {
-        logger.info("[连接] %s".format(event.toText()))
+        logger.debug("[连接] %s".format(event.toText()))
     }
 }

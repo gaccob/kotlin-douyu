@@ -18,6 +18,6 @@ object HeartbeatEventPrinter : SocketMessageListener {
     }
 
     override fun onMessage(event: SocketEvent) {
-        logger.info("[心跳] %s".format(event.toText()))
+        logger.debug("[心跳] %s".format(event.toText()))
     }
 }
