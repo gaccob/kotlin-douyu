@@ -14,11 +14,13 @@ import robott.dy.service.PullMessageService
 private val groupId = -9999
 
 fun main(args: Array<String>) {
+    // per room per 3 thread running
+    val maxRoomCount = 10
     // get live rooms
-    val rooms = DouyuService().liveRooms()
+    val rooms = DouyuService().liveRooms(maxRoomCount)
 
     // per room per THREAD to fetch bullet screen
-    for (i in 1..5) {
+    for (i in 1..maxRoomCount) {
         val room = rooms.get(i)
         val room_id = room.room_id
         val room_name = room.room_name
