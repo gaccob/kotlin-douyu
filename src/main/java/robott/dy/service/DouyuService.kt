@@ -72,8 +72,9 @@ class DouyuService {
 
     /**
      * Get live room id by BLOCKING-MODE
+     * maxCount <= 0 mean get all rooms
      */
-    fun liveRooms(): List<LiveRoom> {
+    fun liveRooms(maxCount: Int): List<LiveRoom> {
         var rooms = mutableListOf<LiveRoom>()
         var offset = 0
         var limit = 100
@@ -92,11 +93,16 @@ class DouyuService {
 
                     if (logger.isDebugEnabled) {
                         logger.debug("Get live room %d to %d success!".format(offset, offset + limit))
-                        logger.debug("[RESP] %s".format(resp))
+                        //  logger.debug("[RESP] %s".format(resp))
                     }
 
                     // the new begin index
                     offset = offset + limit
+
+                    // check is rooms enough
+                    if (rooms.size >= maxCount && maxCount > 0 ) {
+                        isContinue = false
+                    }
                 } else {
                     isContinue = false
                 }
